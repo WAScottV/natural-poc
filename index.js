@@ -10,52 +10,49 @@ const rl = readline.createInterface({
 
 const classifier = new natural.BayesClassifier();
 
-classifier.events.on('trainedWithDocument', function (obj) {
-    console.log(obj);
-    console.log('You may now input data');
-    /* {
-    *   total: 23 // There are 23 total documents being trained against
-    *   index: 12 // The index/number of the document that's just been trained against
-    *   doc: {...} // The document that has just been indexed
-    *  }
-    */
- });
+classifier.events.on('doneTraining', function (val) {
+    console.log('Done Training.');
+    const time = console.timeEnd('train');
 
-classifier.addDocument('i am long qqqq', 'buy');
-classifier.addDocument('buy the q\'s', 'buy');
-classifier.addDocument('short gold', 'sell');
-classifier.addDocument('sell gold', 'sell');
- 
-classifier.train();
+    // UI
 
-rl.prompt();
-
-rl.on('line', (input) => {
-    if (input === '*') {
-        rl.close();
-        return;
-    }
-    try {
-        console.log('Response: ', classifier.classify(input));
-    } catch (e) {
-        console.log(e);
-    }
     rl.prompt();
-}).on('close', () => {
-    console.log('Ending program...');
-    process.exit(0);
+
+    rl.on('line', (input) => {
+        if (input === '*') {
+            rl.close();
+            return;
+        }
+        try {
+            console.log('Response: ', classifier.getClassifications(input));
+        } catch (e) {
+            console.log(e);
+        }
+        rl.prompt();
+    }).on('close', () => {
+        console.log('Ending program...');
+        process.exit(0);
+    });
 });
 
-// u.readFile('./weather_data_train.csv')
-//     .then(doc => {
-//         var temp = doc.split('\r');
-//         for (let i = 0; i < 2; i++) {
-//             classifier.addDocument(temp[i].split(','));
-//             console.log('add');
-//         }
-//         // temp.forEach(s => {
-//         //     classifier.addDocument(s.split(','));
-//         // });
-//         console.log('train');
-//         classifier.train();
-//     });
+u.readFile('./weather_data_train.csv')
+    .then(doc => {
+        const temp = doc.split('\r');
+        console.time('train');
+        temp.forEach(s => {
+            const args = s.split(',');
+            classifier.addDocument(args[0], args[1]);
+        });
+
+        classifier.train();
+    });
+
+    // setTimeout(() => {
+    //     classifier.save('cb.json', (err, classifier) => {
+    //         if (err) {
+    //             console.log('Error: ', err);
+    //         } else {
+    //             console.log(JSON.stringify(classifier, null, 2));
+    //         }
+    //     });
+    // }, 4000);
