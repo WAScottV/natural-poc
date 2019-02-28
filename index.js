@@ -5,7 +5,7 @@ const u = require('./utils');
 const rl = readline.createInterface({
     input: process.stdin,
     output: process.stdout,
-    prompt: 'Enter phrase: ',
+    prompt: 'Enter command: ',
 });
 
 const classifier = new natural.BayesClassifier();
@@ -15,18 +15,29 @@ classifier.events.on('doneTraining', function (val) {
     const time = console.timeEnd('train');
 
     // UI
+    /*
+    + ==> add document
+    p ==> print training set
+    c ==> classify
+    * ==> exit
+    */
 
     rl.prompt();
 
     rl.on('line', (input) => {
-        if (input === '*') {
-            rl.close();
-            return;
-        }
-        try {
-            console.log('Response: ', classifier.getClassifications(input));
-        } catch (e) {
-            console.log(e);
+        switch (input) {
+            case '*':
+                rl.close();
+                break;
+            case 'c':
+                rl.question('Enter phrase: ', (answer) => {
+                    console.log(classifier.getClassifications(answer));
+                    rl.prompt();
+                });
+                break;
+            default:
+                console.log('Unrecognized command.');
+                break;
         }
         rl.prompt();
     }).on('close', () => {
@@ -35,17 +46,30 @@ classifier.events.on('doneTraining', function (val) {
     });
 });
 
-u.readFile('./weather_data_train.csv')
-    .then(doc => {
-        const temp = doc.split('\r');
-        console.time('train');
-        temp.forEach(s => {
-            const args = s.split(',');
-            classifier.addDocument(args[0], args[1]);
-        });
+u.getMysqlData()
+    .then(data => console.log(JSON.stringify(data, null, 2)));
 
-        classifier.train();
-    });
+
+// u.readFile('./weather_data_train.csv')
+//     .then(doc => {
+//         const temp = doc.split('\r');
+//         console.time('train');
+//         temp.forEach(s => {
+//             const args = s.split(',');
+//             classifier.addDocument(args[0], args[1]);
+//         });
+
+//         classifier.train();
+//     });
+
+// const addDocument = (line) => {
+//     const args = line.split(',');
+//     if (args.length !== 2) {
+//         console.error('Message not in correct format');
+//     } else {
+//         classifier.addDocument(args[0], args[1]);
+//     }
+// };
 
     // setTimeout(() => {
     //     classifier.save('cb.json', (err, classifier) => {
