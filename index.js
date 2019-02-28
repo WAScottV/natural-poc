@@ -47,7 +47,12 @@ classifier.events.on('doneTraining', function (val) {
 });
 
 u.getMysqlData()
-    .then(data => console.log(JSON.stringify(data, null, 2)));
+    .then(response => {
+        const data = response.filter(obj => obj.Exclude === 0)
+            .map(obj => ({ r: obj.Response1, c: obj.Classifier }));
+
+        console.log(data);
+    });
 
 
 // u.readFile('./weather_data_train.csv')

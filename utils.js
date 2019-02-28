@@ -16,11 +16,10 @@ module.exports.readFile = (path) => {
 module.exports.getMysqlData = () => {
     return new Promise((resolve, reject) => {
         request.get('http://localhost:3000', (error, response, body) => {
-            console.log('call is done');
             if (error) {
                 reject(error);
             } else {
-                resolve(body);
+                resolve(JSON.parse(body));
             }
         });
     });
