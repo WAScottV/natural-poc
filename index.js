@@ -46,13 +46,20 @@ classifier.events.on('doneTraining', function (val) {
     });
 });
 
-u.getMysqlData()
+u.getMysqlRandomData()
     .then(response => {
-        const data = response.filter(obj => obj.Exclude === 0)
-            .map(obj => ({ r: obj.Response1, c: obj.Classifier }));
-
-        console.log(data);
-    });
+        const trainData = response.train
+            .map(obj => ({ u: obj.UnitId, r: obj.Response1, c: obj.Classifier }));
+        const testData = response.test
+            .map(obj => ({ u: obj.UnitId, r: obj.Response1, c: obj.Classifier }));
+        
+        console.time('train');
+        trainData.forEach(d => {
+            classifier.addDocument(d.r, d.c);
+        });
+        classifier.train();
+    })
+    .catch(console.error);
 
 
 // u.readFile('./weather_data_train.csv')
