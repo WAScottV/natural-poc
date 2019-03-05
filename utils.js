@@ -17,7 +17,9 @@ module.exports.getMysqlRandomData = () => {
     return new Promise((resolve, reject) => {
         request.get('http://localhost:3000/random', {
             qs: {
-                pct: '0.7'
+                pct: '0.7',
+                res_col: '1',
+                seed: '1',
             }
         }, (error, response, body) => {
             if (error) {

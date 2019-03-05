@@ -2,6 +2,9 @@ const natural = require('natural');
 const readline = require('readline');
 const u = require('./utils');
 
+let trainData = [];
+let testData = [];
+
 const rl = readline.createInterface({
     input: process.stdin,
     output: process.stdout,
@@ -11,49 +14,21 @@ const rl = readline.createInterface({
 const classifier = new natural.BayesClassifier();
 
 classifier.events.on('doneTraining', function (val) {
-    console.log('Done Training.');
-    const time = console.timeEnd('train');
-
-    // UI
-    /*
-    + ==> add document
-    p ==> print training set
-    c ==> classify
-    * ==> exit
-    */
-
-    rl.prompt();
-
-    rl.on('line', (input) => {
-        switch (input) {
-            case '*':
-                rl.close();
-                break;
-            case 'c':
-                rl.question('Enter phrase: ', (answer) => {
-                    console.log(classifier.getClassifications(answer));
-                    rl.prompt();
-                });
-                break;
-            default:
-                console.log('Unrecognized command.');
-                break;
-        }
-        rl.prompt();
-    }).on('close', () => {
-        console.log('Ending program...');
-        process.exit(0);
-    });
+    console.timeEnd('train');
+    // testData.forEach(td => {
+    //     classifier.classify();
+    // });
+    uiLoop();
 });
 
 u.getMysqlRandomData()
     .then(response => {
-        const trainData = response.train
-            .map(obj => ({ u: obj.UnitId, r: obj.Response1, c: obj.Classifier }));
-        const testData = response.test
-            .map(obj => ({ u: obj.UnitId, r: obj.Response1, c: obj.Classifier }));
-        
-        console.time('train');
+        trainData = response.train
+            .map(obj => ({ r: obj.Response, c: obj.Classifier }));
+        testData = response.test
+            .map(obj => ({ r: obj.Response, c: obj.Classifier }));
+
+        console.time('train'); // begin timer for training
         trainData.forEach(d => {
             classifier.addDocument(d.r, d.c);
         });
@@ -61,34 +36,35 @@ u.getMysqlRandomData()
     })
     .catch(console.error);
 
+const uiLoop = () => {
+    // commands
+    /*
+    + ==> add document
+    p ==> print training set
+    c ==> classify
+    * ==> exit
+    */
 
-// u.readFile('./weather_data_train.csv')
-//     .then(doc => {
-//         const temp = doc.split('\r');
-//         console.time('train');
-//         temp.forEach(s => {
-//             const args = s.split(',');
-//             classifier.addDocument(args[0], args[1]);
-//         });
+   rl.prompt();
 
-//         classifier.train();
-//     });
-
-// const addDocument = (line) => {
-//     const args = line.split(',');
-//     if (args.length !== 2) {
-//         console.error('Message not in correct format');
-//     } else {
-//         classifier.addDocument(args[0], args[1]);
-//     }
-// };
-
-    // setTimeout(() => {
-    //     classifier.save('cb.json', (err, classifier) => {
-    //         if (err) {
-    //             console.log('Error: ', err);
-    //         } else {
-    //             console.log(JSON.stringify(classifier, null, 2));
-    //         }
-    //     });
-    // }, 4000);
+   rl.on('line', (input) => {
+       switch (input) {
+           case '*':
+               rl.close();
+               break;
+           case 'c':
+               rl.question('Enter phrase: ', (answer) => {
+                   console.log(classifier.classify(answer));
+                   rl.prompt();
+               });
+               break;
+           default:
+               console.log('Unrecognized command.');
+               break;
+       }
+       rl.prompt();
+   }).on('close', () => {
+       console.log('Ending program...');
+       process.exit(0);
+   });
+};
