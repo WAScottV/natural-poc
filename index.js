@@ -1,6 +1,7 @@
 const natural = require('natural');
 const readline = require('readline');
 const u = require('./utils');
+const fs = require('fs');
 
 let trainData = [];
 let testData = [];
@@ -15,24 +16,46 @@ const classifier = new natural.BayesClassifier();
 
 classifier.events.on('doneTraining', function (val) {
     console.timeEnd('train');
-    // testData.forEach(td => {
-    //     classifier.classify();
-    // });
-    uiLoop();
+    const testResults = { correct: 0, incorrect: 0, results: [] };
+    testData.forEach(td => {
+        const thisClass = classifier.classify(td.phrase);
+        let correct = false;
+        if (thisClass === td.classifier) {
+            testResults.correct++;
+            correct = true;
+        } else {
+            testResults.incorrect++;
+        }
+        testResults.results.push({ 
+            correct,
+            phrase: td.phrase, 
+            correctClass: td.classifier, 
+            assignedClass: thisClass,
+        });
+    });
+    fs.writeFile('./results/test.json', Buffer.from(JSON.stringify(testResults)), err => {
+        if (err) console.error(err);
+    });
+    console.log('Correct: ', testResults.correct);
+    console.log('Incorrect: ', testResults.incorrect);
+    // uiLoop();
 });
 
 u.getMysqlRandomData()
     .then(response => {
         trainData = response.train
-            .map(obj => ({ r: obj.Response, c: obj.Classifier }));
+            .map(obj => ({ phrase: obj.Response, classifier: obj.Classifier }));
         testData = response.test
-            .map(obj => ({ r: obj.Response, c: obj.Classifier }));
+            .map(obj => ({ phrase: obj.Response, classifier: obj.Classifier }));
 
         console.time('train'); // begin timer for training
         trainData.forEach(d => {
-            classifier.addDocument(d.r, d.c);
+            classifier.addDocument(d.phrase, d.classifier);
         });
         classifier.train();
+        fs.writeFile('./results/train.json', Buffer.from(JSON.stringify(trainData)), err => {
+            if (err) console.error(err);
+        });
     })
     .catch(console.error);
 

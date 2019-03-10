@@ -15,9 +15,9 @@ module.exports.readFile = (path) => {
 
 module.exports.getMysqlRandomData = () => {
     return new Promise((resolve, reject) => {
-        request.get('http://localhost:3000/random', {
+        request.get('http://localhost:3000/data', {
             qs: {
-                pct: '0.7',
+                pct: '0.8',
                 res_col: '1',
                 seed: '1',
             }
