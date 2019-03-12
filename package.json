@@ -18,6 +18,7 @@
   },
   "homepage": "https://github.com/WAScottV/natural-poc#readme",
   "dependencies": {
+    "ml-confusion-matrix": "^0.3.0",
     "natural": "^0.6.3",
     "request": "^2.88.0"
   }

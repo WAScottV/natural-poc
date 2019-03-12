@@ -36,6 +36,9 @@ classifier.events.on('doneTraining', function (val) {
     fs.writeFile('./results/test.json', Buffer.from(JSON.stringify(testResults)), err => {
         if (err) console.error(err);
     });
+    fs.writeFile('./results/incorrect.json', Buffer.from(JSON.stringify(testResults.results.filter(r => !r.correct))), err => {
+        if (err) console.error(err);
+    });
     console.log('Correct: ', testResults.correct);
     console.log('Incorrect: ', testResults.incorrect);
     // uiLoop();
