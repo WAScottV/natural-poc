@@ -33,7 +33,7 @@ classifier.events.on('doneTraining', function (val) {
             assignedClass: thisClass,
         });
     });
-    fs.writeFile('./results/test.json', Buffer.from(JSON.stringify(testResults)), err => {
+    fs.writeFile('./results/test-results.json', Buffer.from(JSON.stringify(testResults)), err => {
         if (err) console.error(err);
     });
     fs.writeFile('./results/incorrect.json', Buffer.from(JSON.stringify(testResults.results.filter(r => !r.correct))), err => {

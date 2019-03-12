@@ -1,13 +1,9 @@
 const ConfusionMatrix = require('ml-confusion-matrix');
 const fs = require('fs');
 
-const errCallback = (err) => {
-  if (err) console.error(err);
-};
-
-fs.readFile('./results/incorrect.json', (err, data) => {
+fs.readFile('./results/test-results.json', (err, data) => {
   const temp = Buffer.from(data);
-  const obj = JSON.parse(temp.toString('utf8')).results;
+  const obj = JSON.parse(temp.toString('utf8')).results.filter(r => !r.correct);
   const trueLabels = obj.map(d => d.assignedClass);
   const predictedLabels = obj.map(d => d.correctClass);
   const CM2 = ConfusionMatrix.fromLabels(trueLabels, predictedLabels);
@@ -15,7 +11,7 @@ fs.readFile('./results/incorrect.json', (err, data) => {
   const labels = CM2.getLabels();
   console.log(printTables(CM2));
 
-  fs.writeFileSync('./results/matrix.csv', '', errCallback);
+  fs.writeFileSync('./results/matrix.csv', '');
   fs.appendFileSync('./results/matrix.csv', `,${labels.toString()}\n`);
   for (let i = 0; i < matrix.length; i++) {
     fs.appendFileSync('./results/matrix.csv', `${labels[i]},${matrix[i].toString()}\n`);
