@@ -2,15 +2,16 @@ const natural = require('natural');
 const readline = require('readline');
 const u = require('./utils');
 const fs = require('fs');
+const cm = require('./confusionMatrix');
 
 let trainData = [];
 let testData = [];
 
-const rl = readline.createInterface({
-    input: process.stdin,
-    output: process.stdout,
-    prompt: 'Enter command: ',
-});
+// const rl = readline.createInterface({
+//     input: process.stdin,
+//     output: process.stdout,
+//     prompt: 'Enter command: ',
+// });
 
 const classifier = new natural.BayesClassifier();
 
@@ -36,15 +37,13 @@ classifier.events.on('doneTraining', function (val) {
     fs.writeFile('./results/test-results.json', Buffer.from(JSON.stringify(testResults)), err => {
         if (err) console.error(err);
     });
-    fs.writeFile('./results/incorrect.json', Buffer.from(JSON.stringify(testResults.results.filter(r => !r.correct))), err => {
-        if (err) console.error(err);
-    });
     console.log('Correct: ', testResults.correct);
     console.log('Incorrect: ', testResults.incorrect);
+    cm.createCsvConfusionMatrix('./results/test-results.json', './results/matrix.csv');
     // uiLoop();
 });
 
-u.getMysqlRandomData()
+u.getMysqlData()
     .then(response => {
         trainData = response.train
             .map(obj => ({ phrase: obj.Response, classifier: obj.Classifier }));

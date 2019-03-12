@@ -13,7 +13,7 @@ module.exports.readFile = (path) => {
     })
 };
 
-module.exports.getMysqlRandomData = () => {
+module.exports.getMysqlData = () => {
     return new Promise((resolve, reject) => {
         request.get('http://localhost:3000/data', {
             qs: {
