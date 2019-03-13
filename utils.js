@@ -25,7 +25,12 @@ module.exports.getMysqlData = () => {
             if (error) {
                 reject(error);
             } else {
-                resolve(JSON.parse(body));
+                const bodyObj = JSON.parse(body);
+                const trainData = bodyObj.train
+                    .map(obj => ({ phrase: obj.Response, classifier: obj.Classifier }));
+                const testData = bodyObj.test
+                    .map(obj => ({ phrase: obj.Response, classifier: obj.Classifier }));
+                resolve({ trainData, testData });
             }
         });
     });

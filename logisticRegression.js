@@ -10,19 +10,16 @@ const classifier = new natural.LogisticRegressionClassifier();
 
 u.getMysqlData()
     .then(response => {
-        trainData = response.train
-            .map(obj => ({ phrase: obj.Response, classifier: obj.Classifier }));
-        testData = response.test
-            .map(obj => ({ phrase: obj.Response, classifier: obj.Classifier }));
-
-        trainData.forEach(d => {
+        
+        response.trainData.forEach(d => {
             classifier.addDocument(d.phrase, d.classifier);
         });
+        // StevenFurt1k?
         fs.writeFileSync('./results/train.json', Buffer.from(JSON.stringify(trainData)));
         classifier.train(); // syncronously wait for completion. library seems broken because
                             // event listener doesn't work for this...
         const testResults = { correct: 0, incorrect: 0, results: [] };
-        testData.forEach(td => {
+        response.testData.forEach(td => {
             try {
                 const thisClass = classifier.classify(td.phrase);
                 let correct = false;
