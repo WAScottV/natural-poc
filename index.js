@@ -7,16 +7,9 @@ const cm = require('./confusionMatrix');
 let trainData = [];
 let testData = [];
 
-// const rl = readline.createInterface({
-//     input: process.stdin,
-//     output: process.stdout,
-//     prompt: 'Enter command: ',
-// });
-
 const classifier = new natural.BayesClassifier();
 
-classifier.events.on('doneTraining', function (val) {
-    console.timeEnd('train');
+classifier.events.on('doneTraining', (val) => {
     const testResults = { correct: 0, incorrect: 0, results: [] };
     testData.forEach(td => {
         const thisClass = classifier.classify(td.phrase);
@@ -37,9 +30,9 @@ classifier.events.on('doneTraining', function (val) {
     fs.writeFile('./results/test-results.json', Buffer.from(JSON.stringify(testResults)), err => {
         if (err) console.error(err);
     });
+    cm.createCsvConfusionMatrix('./results/test-results.json', './results/matrix.csv');
     console.log('Correct: ', testResults.correct);
     console.log('Incorrect: ', testResults.incorrect);
-    cm.createCsvConfusionMatrix('./results/test-results.json', './results/matrix.csv');
     // uiLoop();
 });
 
@@ -50,7 +43,6 @@ u.getMysqlData()
         testData = response.test
             .map(obj => ({ phrase: obj.Response, classifier: obj.Classifier }));
 
-        console.time('train'); // begin timer for training
         trainData.forEach(d => {
             classifier.addDocument(d.phrase, d.classifier);
         });
@@ -61,35 +53,45 @@ u.getMysqlData()
     })
     .catch(console.error);
 
-const uiLoop = () => {
-    // commands
-    /*
-    + ==> add document
-    p ==> print training set
-    c ==> classify
-    * ==> exit
-    */
+const classifyData = () => {
+    
+}
 
-   rl.prompt();
+// const rl = readline.createInterface({
+//     input: process.stdin,
+//     output: process.stdout,
+//     prompt: 'Enter command: ',
+// });
 
-   rl.on('line', (input) => {
-       switch (input) {
-           case '*':
-               rl.close();
-               break;
-           case 'c':
-               rl.question('Enter phrase: ', (answer) => {
-                   console.log(classifier.classify(answer));
-                   rl.prompt();
-               });
-               break;
-           default:
-               console.log('Unrecognized command.');
-               break;
-       }
-       rl.prompt();
-   }).on('close', () => {
-       console.log('Ending program...');
-       process.exit(0);
-   });
-};
+// const uiLoop = () => {
+//     // commands
+//     /*
+//     + ==> add document
+//     p ==> print training set
+//     c ==> classify
+//     * ==> exit
+//     */
+
+//    rl.prompt();
+
+//    rl.on('line', (input) => {
+//        switch (input) {
+//            case '*':
+//                rl.close();
+//                break;
+//            case 'c':
+//                rl.question('Enter phrase: ', (answer) => {
+//                    console.log(classifier.classify(answer));
+//                    rl.prompt();
+//                });
+//                break;
+//            default:
+//                console.log('Unrecognized command.');
+//                break;
+//        }
+//        rl.prompt();
+//    }).on('close', () => {
+//        console.log('Ending program...');
+//        process.exit(0);
+//    });
+// };
