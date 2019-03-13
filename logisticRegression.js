@@ -19,7 +19,8 @@ u.getMysqlData()
             classifier.addDocument(d.phrase, d.classifier);
         });
         fs.writeFileSync('./results/train.json', Buffer.from(JSON.stringify(trainData)));
-        classifier.train();
+        classifier.train(); // syncronously wait for completion. library seems broken because
+                            // event listener doesn't work for this...
         const testResults = { correct: 0, incorrect: 0, results: [] };
         testData.forEach(td => {
             try {
