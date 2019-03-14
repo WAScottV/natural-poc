@@ -9,23 +9,7 @@ let testData = [];
 const classifier = new natural.BayesClassifier();
 
 classifier.events.on('doneTraining', (val) => {
-    const testResults = { correct: 0, incorrect: 0, results: [] };
-    testData.forEach(td => {
-        const thisClass = classifier.classify(td.phrase);
-        let correct = false;
-        if (thisClass === td.classifier) {
-            testResults.correct++;
-            correct = true;
-        } else {
-            testResults.incorrect++;
-        }
-        testResults.results.push({
-            correct,
-            phrase: td.phrase, 
-            correctClass: td.classifier, 
-            assignedClass: thisClass,
-        });
-    });
+    const testResults = u.classifyTestData(classifier, classifier.classify, testData);
     fs.writeFileSync('./results/test-results.json', Buffer.from(JSON.stringify(testResults)));
     cm.createCsvConfusionMatrix('./results/test-results.json', './results/matrix.csv');
     console.log('Correct: ', testResults.correct);

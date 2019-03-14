@@ -35,3 +35,24 @@ module.exports.getMysqlData = () => {
         });
     });
 };
+
+module.exports.classifyTestData = (fnContext, classifierFn, testData) => {
+    const testResults = { correct: 0, incorrect: 0, results: [] };
+    testData.forEach(td => {
+        const thisClass = classifierFn.call(fnContext, td.phrase);
+        let correct = false;
+        if (thisClass === td.classifier) {
+            testResults.correct++;
+            correct = true;
+        } else {
+            testResults.incorrect++;
+        }
+        testResults.results.push({
+            correct,
+            phrase: td.phrase, 
+            correctClass: td.classifier, 
+            assignedClass: thisClass,
+        });
+    });
+    return testResults;
+};
