@@ -1,5 +1,6 @@
 const fs = require('fs');
 const request = require('request');
+const cm = require('./confusionMatrix');
 
 module.exports.readFile = (path) => {
     return new Promise((resolve, reject) => {
@@ -55,4 +56,12 @@ module.exports.classifyTestData = (fnContext, classifierFn, testData) => {
         });
     });
     return testResults;
+};
+
+module.exports.logResults = (trainData, testResults) => {
+    fs.writeFileSync('./results/train.json', Buffer.from(JSON.stringify(trainData)));
+    fs.writeFileSync('./results/test-results.json', Buffer.from(JSON.stringify(testResults)));
+    cm.createCsvConfusionMatrix('./results/test-results.json', './results/matrix.csv');
+    console.log('Correct: ', testResults.correct);
+    console.log('Incorrect: ', testResults.incorrect);
 };
