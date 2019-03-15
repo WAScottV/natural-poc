@@ -28,19 +28,22 @@ module.exports.getMysqlData = () => {
             } else {
                 const bodyObj = JSON.parse(body);
                 const trainData = bodyObj.train
-                    .map(obj => ({ phrase: obj.Response, classifier: obj.Classifier }));
+                    .map(obj => ({ phrase: obj.Response, classification: obj.Classifier }));
                 const testData = bodyObj.test
-                    .map(obj => ({ phrase: obj.Response, classifier: obj.Classifier }));
+                    .map(obj => ({ phrase: obj.Response, classification: obj.Classifier }));
                 resolve({ trainData, testData });
             }
         });
     });
 };
 
-module.exports.classifyTestData = (fnContext, classifierFn, testData) => {
+module.exports.classifyTestData = (fnContext, classifierFn, testData, parseFn) => {
     const testResults = { correct: 0, incorrect: 0, results: [] };
     testData.forEach(td => {
-        const thisClass = classifierFn.call(fnContext, td.phrase);
+        let thisClass = classifierFn.call(fnContext, td.phrase);
+        if (parseFn) {
+            thisClass = parseFn(thisClass);
+        }
         let correct = false;
         if (thisClass === td.classifier) {
             testResults.correct++;
